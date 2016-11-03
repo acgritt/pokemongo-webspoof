@@ -3,9 +3,9 @@
   padding: 20px;
   background: rgba(0, 0, 0, .8);
   border-radius: 5px;
-  top: 130px;
+  top: 160px;
   right: 10px;
-  height: calc(100vh - 300px);
+  height: calc(100vh - 320px);
   width: 250px;
 
   input {

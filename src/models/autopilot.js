@@ -4,6 +4,7 @@ import haversine from 'haversine'
 import Alert from 'react-s-alert'
 
 import userLocation from './user-location.js'
+import settings from './settings.js'
 
 class Autopilot {
 
@@ -16,9 +17,14 @@ class Autopilot {
   @observable distance = 0 // remaining distance to arrival in km
   @observable rawOverviewPath = null // save last query to re-calculate optimized route
   @observable destination = { lat: null, lng: null };
+  @observable straightWalk = { startLat: null, startLng: null, endLat: null, endLng: null }
 
   @computed get accurateSteps() {
-    if (this.rawOverviewPath) {
+    if (settings.walkAStraightLine) {
+      const { steps } = this.calculateIntermediateSteps2(this.straightWalk)
+      return steps
+    }
+    else if (this.rawOverviewPath) {
       const { steps } = this.calculateIntermediateSteps(this.rawOverviewPath)
       return steps
     } else {
@@ -115,12 +121,57 @@ class Autopilot {
       { distance: 0, steps: [] }
     )
 
+  calculateIntermediateSteps2 = (walk) =>
+  {
+      const pendingDistance = haversine(
+        { latitude: walk.startLat, longitude: walk.startLng },
+        { latitude: walk.endLat, longitude: walk.endLng }
+      )
+
+      if (isNaN(this.speed)) {
+        return {
+          distance: pendingDistance,
+          steps: [ { lat: walk.endLat, lng: walk.endLng } ]
+        }
+      }
+
+      // 0.0025 ~= 2,5m/s ~= 9 km/h
+      const splitInto = (pendingDistance / this.speed).toFixed()
+
+      const latSteps = (Math.abs(walk.startLat - walk.endLat)) / splitInto
+      const lngSteps = (Math.abs(walk.startLng - walk.endLng)) / splitInto
+
+      const stepsInBetween = times(splitInto, (step) => {
+        const calculatedLat = (walk.startLat > walk.endLat) ?
+          walk.startLat - (latSteps * step) : walk.startLat + (latSteps * step)
+        const calculatedLng = (walk.startLng > walk.endLng) ?
+          walk.startLng - (lngSteps * step) : walk.startLng + (lngSteps * step)
+
+        return { lat: calculatedLat, lng: calculatedLng }
+      })
+
+      return {
+        distance: pendingDistance,
+        steps: [ ...stepsInBetween ]
+      }
+  }
+
   @action scheduleTrip = async (lat, lng) => {
     try {
-      const foundPath = await this.findDirectionPath(lat, lng)
-      const { distance } = this.calculateIntermediateSteps(foundPath)
+      if (settings.walkAStraightLine)
+      {
+        this.straightWalk = { startLat: userLocation[0], startLng: userLocation[1], endLat: lat, endLng: lng}
+        const { distance } = this.calculateIntermediateSteps2(this.straightWalk)
 
-      this.distance = distance
+        this.distance = distance
+      }
+      else
+      {
+        const foundPath = await this.findDirectionPath(lat, lng)
+        const { distance } = this.calculateIntermediateSteps(foundPath)
+
+        this.distance = distance
+      }
     } catch (error) {
       Alert.error(`
         <strong>Error with schedule trip</strong>

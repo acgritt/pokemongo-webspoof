@@ -2,12 +2,13 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import cx from 'classnames'
 
-import { addJitterToMoves, stationaryUpdates, updateXcodeLocation } from '../../models/settings.js'
+import { addJitterToMoves, stationaryUpdates, updateXcodeLocation, walkAStraightLine } from '../../models/settings.js'
 
 const settings = [
   [ addJitterToMoves, 'Add randomness to moves' ],
   [ stationaryUpdates, 'Update even when stationary' ],
-  [ updateXcodeLocation, 'Auto update Xcode location' ]
+  [ updateXcodeLocation, 'Auto update Xcode location' ],
+  [ walkAStraightLine, 'Walk a straight line' ]
 ]
 
 const BooleanSettings = observer(() =>
