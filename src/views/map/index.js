@@ -8,7 +8,8 @@ import Alert from 'react-s-alert'
 
 import userLocation from '../../models/user-location.js'
 import settings from '../../models/settings.js'
-import pokemons from '../../models/pokemons.js'
+// **Remove support for FastPokeMap.se**
+//import pokemons from '../../models/pokemons.js'
 
 import SpeedCounter from './speed-counter.js'
 import BooleanSettings from './boolean-settings.js'
@@ -19,7 +20,8 @@ import TotalDistance from './total-distance.js'
 import Autopilot from './autopilot.js'
 import Pokeball from './pokeball.js'
 import Pokemon from './pokemon.js'
-import ExcludedPokemons from './execluded-pokemons.js'
+// **Remove support for FastPokeMap.se**
+//import ExcludedPokemons from './execluded-pokemons.js'
 
 @observer
 class Map extends Component {
@@ -145,7 +147,8 @@ class Map extends Component {
         <Controls />
         <TotalDistance />
         <Autopilot ref={ (ref) => { this.autopilot = ref } } />
-        <ExcludedPokemons />
+        /* **Removed use of FastPokeMap.se** */
+        /* <ExcludedPokemons /> */
       </div>
     )
   }
